@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>PolySleuth - Simple Test</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 40px;
+            background: #222;
+            color: #fff;
+        }
+        .card {
+            background: #333;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        .success { color: #0f0; }
+        .error { color: #f00; }
+    </style>
+</head>
+<body>
+    <h1>🔍 PolySleuth - 简化测试页面</h1>
+    
+    <div class="card">
+        <h2>如果你能看到这个页面，说明：</h2>
+        <ul>
+            <li class="success">✅ FastAPI 服务正常运行</li>
+            <li class="success">✅ 静态文件路由工作正常</li>
+            <li class="success">✅ HTML 可以正常渲染</li>
+        </ul>
+    </div>
+    
+    <div class="card">
+        <h2>API 测试：</h2>
+        <button onclick="testAPI()" style="padding: 10px 20px; cursor: pointer;">测试 API 连接</button>
+        <pre id="api-result" style="background: #000; padding: 10px; margin-top: 10px;"></pre>
+    </div>
+    
+    <div class="card">
+        <h2>下一步：</h2>
+        <p>如果 API 测试成功，请访问：</p>
+        <ul>
+            <li><a href="/" style="color: #00f5d4">主页面 (/)</a></li>
+            <li><a href="/docs" style="color: #00f5d4">API 文档 (/docs)</a></li>
+        </ul>
+    </div>
+    
+    <script>
+        async function testAPI() {
+            const result = document.getElementById('api-result');
+            result.textContent = '请求中...';
+            try {
+                const response = await fetch('/api/system/stats');
+                const data = await response.json();
+                result.textContent = JSON.stringify(data, null, 2);
+                result.style.color = '#0f0';
+            } catch (error) {
+                result.textContent = `错误: ${error.message}`;
+                result.style.color = '#f00';
+            }
+        }
+        
+        // 页面加载时自动测试
+        window.addEventListener('load', () => {
+            console.log('✅ 页面加载完成');
+            testAPI();
+        });
+    </script>
+</body>
+</html>

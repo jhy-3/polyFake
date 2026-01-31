@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PolySleuth - Polymarket 刷量取证分析</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <!-- Google Fonts 可能被墙，使用备用字体 -->
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js" async></script>
+</head>
+<body>
+    <!-- 背景效果 -->
+    <div class="cyber-grid"></div>
+    <div class="scanline"></div>
+    
+    <!-- 顶部导航 -->
+    <header class="header">
+        <div class="logo">
+            <span class="logo-icon">🔍</span>
+            <span class="logo-text">POLY<span class="accent">SLEUTH</span></span>
+        </div>
+        <nav class="nav">
+            <button class="nav-btn active" data-page="dashboard">仪表盘</button>
+            <button class="nav-btn" data-page="trades">交易记录</button>
+            <button class="nav-btn" data-page="markets">市场分析</button>
+            <button class="nav-btn" data-page="alerts">警报中心</button>
+        </nav>
+        <div class="status-bar">
+            <div class="status-item" id="chain-status">
+                <span class="status-dot offline"></span>
+                <span class="status-text">断开连接</span>
+            </div>
+            <div class="status-item" id="stream-status">
+                <span class="status-icon">📡</span>
+                <span class="status-text">离线</span>
+            </div>
+            <div class="status-item" id="block-number">
+                <span class="status-icon">⛓️</span>
+                <span class="status-text">--</span>
+            </div>
+        </div>
+    </header>
+    
+    <!-- 主内容 -->
+    <main class="main">
+        <!-- 仪表盘页面 -->
+        <div class="page active" id="page-dashboard">
+            <!-- 统计卡片 -->
+            <section class="stats-grid">
+                <div class="stat-card glass">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="stat-total-trades">0</div>
+                        <div class="stat-label">总交易数</div>
+                    </div>
+                    <div class="stat-trend up" id="stat-total-trades-trend">+0%</div>
+                </div>
+                <div class="stat-card glass">
+                    <div class="stat-icon">💰</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="stat-total-volume">$0</div>
+                        <div class="stat-label">总交易量</div>
+                    </div>
+                    <div class="stat-trend up" id="stat-total-volume-trend">+0%</div>
+                </div>
+                <div class="stat-card glass warning">
+                    <div class="stat-icon">🚨</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="stat-wash-count">0</div>
+                        <div class="stat-label">刷量交易</div>
+                    </div>
+                    <div class="stat-trend" id="stat-wash-ratio">0%</div>
+                </div>
+                <div class="stat-card glass danger">
+                    <div class="stat-icon">⚠️</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="stat-alerts">0</div>
+                        <div class="stat-label">活跃警报</div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 控制面板 -->
+            <section class="control-panel glass">
+                <h3>🎮 控制中心</h3>
+                <div class="control-buttons">
+                    <button class="btn btn-primary" id="btn-fetch">
+                        <span class="btn-icon">📥</span>
+                        获取数据
+                    </button>
+                    <button class="btn btn-success" id="btn-stream-start">
+                        <span class="btn-icon">▶️</span>
+                        开始监控
+                    </button>
+                    <button class="btn btn-warning" id="btn-stream-stop" disabled>
+                        <span class="btn-icon">⏹️</span>
+                        停止监控
+                    </button>
+                </div>
+                <div class="control-settings">
+                    <div class="setting-item">
+                        <label>获取区块数</label>
+                        <input type="number" id="fetch-blocks" value="100" min="10" max="500">
+                    </div>
+                    <div class="setting-item">
+                        <label>轮询间隔(秒)</label>
+                        <input type="number" id="poll-interval" value="5" min="1" max="30">
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 图表区域 -->
+            <section class="charts-grid">
+                <div class="chart-card glass">
+                    <h3>📈 交易量趋势</h3>
+                    <div id="chart-volume" class="chart-container"></div>
+                </div>
+                <div class="chart-card glass">
+                    <h3>🔴 刷量分布</h3>
+                    <div id="chart-wash" class="chart-container"></div>
+                </div>
+            </section>
+            
+            <!-- 热门市场 -->
+            <section class="hot-markets glass">
+                <h3>🔥 热门市场</h3>
+                <div class="market-cards" id="hot-markets-container">
+                    <div class="loading">加载中...</div>
+                </div>
+            </section>
+            
+            <!-- 最近警报 -->
+            <section class="recent-alerts glass">
+                <h3>🚨 最近警报</h3>
+                <div class="alerts-list" id="recent-alerts-container">
+                    <div class="loading">加载中...</div>
+                </div>
+            </section>
+        </div>
+        
+        <!-- 交易记录页面 -->
+        <div class="page" id="page-trades">
+            <section class="filters glass">
+                <h3>🔍 筛选条件</h3>
+                <div class="filter-row">
+                    <div class="filter-item">
+                        <label>市场</label>
+                        <select id="filter-market">
+                            <option value="">全部市场</option>
+                        </select>
+                    </div>
+                    <div class="filter-item">
+                        <label>交易类型</label>
+                        <select id="filter-wash">
+                            <option value="">全部</option>
+                            <option value="true">刷量交易</option>
+                            <option value="false">正常交易</option>
+                        </select>
+                    </div>
+                    <div class="filter-item">
+                        <label>方向</label>
+                        <select id="filter-side">
+                            <option value="">全部</option>
+                            <option value="BUY">买入</option>
+                            <option value="SELL">卖出</option>
+                        </select>
+                    </div>
+                    <div class="filter-item">
+                        <label>地址</label>
+                        <input type="text" id="filter-address" placeholder="0x...">
+                    </div>
+                    <button class="btn btn-primary" id="btn-filter-trades">应用筛选</button>
+                </div>
+            </section>
+            
+            <section class="trades-table glass">
+                <h3>📋 交易列表</h3>
+                <div class="table-container">
+                    <table id="trades-table">
+                        <thead>
+                            <tr>
+                                <th>时间</th>
+                                <th>市场</th>
+                                <th>方向</th>
+                                <th>价格</th>
+                                <th>数量</th>
+                                <th>交易量</th>
+                                <th>类型</th>
+                                <th>交易哈希</th>
+                            </tr>
+                        </thead>
+                        <tbody id="trades-table-body">
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination">
+                    <button class="btn btn-sm" id="btn-prev-page">上一页</button>
+                    <span id="page-info">第 1 页</span>
+                    <button class="btn btn-sm" id="btn-next-page">下一页</button>
+                </div>
+            </section>
+        </div>
+        
+        <!-- 市场分析页面 -->
+        <div class="page" id="page-markets">
+            <section class="markets-overview glass">
+                <h3>📊 市场概览</h3>
+                <div class="markets-stats">
+                    <div class="market-stat">
+                        <span class="label">活跃市场</span>
+                        <span class="value" id="markets-count">0</span>
+                    </div>
+                    <div class="market-stat">
+                        <span class="label">可疑市场</span>
+                        <span class="value warning" id="suspicious-count">0</span>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="markets-list glass">
+                <h3>🏪 市场列表</h3>
+                <div class="sort-options">
+                    <button class="sort-btn active" data-sort="volume">按交易量</button>
+                    <button class="sort-btn" data-sort="wash_ratio">按刷量比例</button>
+                    <button class="sort-btn" data-sort="trade_count">按交易数</button>
+                </div>
+                <div class="markets-grid" id="markets-container">
+                    <div class="loading">加载中...</div>
+                </div>
+            </section>
+        </div>
+        
+        <!-- 警报中心页面 -->
+        <div class="page" id="page-alerts">
+            <section class="alerts-stats glass">
+                <h3>📊 警报统计</h3>
+                <div class="alert-stats-grid">
+                    <div class="alert-stat high">
+                        <div class="count" id="alerts-high">0</div>
+                        <div class="label">高危警报</div>
+                    </div>
+                    <div class="alert-stat medium">
+                        <div class="count" id="alerts-medium">0</div>
+                        <div class="label">中危警报</div>
+                    </div>
+                    <div class="alert-stat low">
+                        <div class="count" id="alerts-low">0</div>
+                        <div class="label">低危警报</div>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="alerts-chart glass">
+                <h3>📈 警报趋势</h3>
+                <div id="chart-alerts" class="chart-container"></div>
+            </section>
+            
+            <section class="alerts-full glass">
+                <h3>🚨 全部警报</h3>
+                <div class="alerts-filter">
+                    <select id="alert-severity-filter">
+                        <option value="">全部级别</option>
+                        <option value="HIGH">高危</option>
+                        <option value="MEDIUM">中危</option>
+                        <option value="LOW">低危</option>
+                    </select>
+                    <select id="alert-type-filter">
+                        <option value="">全部类型</option>
+                        <option value="SELF_TRADE">自成交</option>
+                        <option value="CIRCULAR_TRADE">环形交易</option>
+                    </select>
+                </div>
+                <div class="alerts-list full" id="all-alerts-container">
+                    <div class="loading">加载中...</div>
+                </div>
+            </section>
+        </div>
+    </main>
+    
+    <!-- 实时交易弹窗 -->
+    <div class="live-feed glass" id="live-feed">
+        <div class="live-header">
+            <span class="live-dot"></span>
+            <span>实时交易</span>
+            <button class="live-toggle" id="live-toggle">−</button>
+        </div>
+        <div class="live-content" id="live-content">
+        </div>
+    </div>
+    
+    <!-- Toast 通知 -->
+    <div class="toast-container" id="toast-container"></div>
+    
+    <script src="/static/app.js"></script>
+</body>
+</html>

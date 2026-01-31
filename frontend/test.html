@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PolySleuth 连接测试</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #1a1a2e;
+            color: #eee;
+        }
+        .test-item {
+            margin: 10px 0;
+            padding: 10px;
+            background: #16213e;
+            border-left: 3px solid #0f3460;
+        }
+        .success { border-color: #0f0; }
+        .error { border-color: #f00; }
+        .loading { color: #888; }
+        pre {
+            background: #000;
+            padding: 10px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 PolySleuth 连接测试</h1>
+    
+    <div class="test-item loading" id="test-html">
+        <strong>1. HTML 加载</strong>
+        <div id="result-html">测试中...</div>
+    </div>
+    
+    <div class="test-item loading" id="test-css">
+        <strong>2. CSS 加载</strong>
+        <div id="result-css">测试中...</div>
+    </div>
+    
+    <div class="test-item loading" id="test-js">
+        <strong>3. JS 加载</strong>
+        <div id="result-js">测试中...</div>
+    </div>
+    
+    <div class="test-item loading" id="test-api">
+        <strong>4. API 连接</strong>
+        <div id="result-api">测试中...</div>
+    </div>
+    
+    <div class="test-item loading" id="test-fonts">
+        <strong>5. 外部资源 (Google Fonts)</strong>
+        <div id="result-fonts">测试中...</div>
+    </div>
+    
+    <div class="test-item loading" id="test-plotly">
+        <strong>6. Plotly CDN</strong>
+        <div id="result-plotly">测试中...</div>
+    </div>
+    
+    <script>
+        async function runTests() {
+            // Test 1: HTML
+            document.getElementById('test-html').className = 'test-item success';
+            document.getElementById('result-html').textContent = '✅ HTML 已加载';
+            
+            // Test 2: CSS
+            const cssTest = document.createElement('link');
+            cssTest.rel = 'stylesheet';
+            cssTest.href = '/static/styles.css';
+            cssTest.onload = () => {
+                document.getElementById('test-css').className = 'test-item success';
+                document.getElementById('result-css').textContent = '✅ CSS 加载成功';
+            };
+            cssTest.onerror = () => {
+                document.getElementById('test-css').className = 'test-item error';
+                document.getElementById('result-css').textContent = '❌ CSS 加载失败';
+            };
+            document.head.appendChild(cssTest);
+            
+            // Test 3: JS
+            const jsTest = document.createElement('script');
+            jsTest.src = '/static/app.js';
+            jsTest.onload = () => {
+                document.getElementById('test-js').className = 'test-item success';
+                document.getElementById('result-js').textContent = '✅ JS 加载成功';
+            };
+            jsTest.onerror = () => {
+                document.getElementById('test-js').className = 'test-item error';
+                document.getElementById('result-js').textContent = '❌ JS 加载失败';
+            };
+            document.head.appendChild(jsTest);
+            
+            // Test 4: API
+            try {
+                const response = await fetch('/api/system/stats');
+                const data = await response.json();
+                document.getElementById('test-api').className = 'test-item success';
+                document.getElementById('result-api').innerHTML = `✅ API 正常<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            } catch (error) {
+                document.getElementById('test-api').className = 'test-item error';
+                document.getElementById('result-api').textContent = `❌ API 错误: ${error.message}`;
+            }
+            
+            // Test 5: Google Fonts
+            const fontsTest = document.createElement('link');
+            fontsTest.rel = 'stylesheet';
+            fontsTest.href = 'https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap';
+            fontsTest.onload = () => {
+                document.getElementById('test-fonts').className = 'test-item success';
+                document.getElementById('result-fonts').textContent = '✅ Google Fonts 加载成功';
+            };
+            fontsTest.onerror = () => {
+                document.getElementById('test-fonts').className = 'test-item error';
+                document.getElementById('result-fonts').textContent = '❌ Google Fonts 加载失败（可能被墙）';
+            };
+            document.head.appendChild(fontsTest);
+            
+            // Test 6: Plotly
+            const plotlyTest = document.createElement('script');
+            plotlyTest.src = 'https://cdn.plot.ly/plotly-2.27.0.min.js';
+            plotlyTest.onload = () => {
+                document.getElementById('test-plotly').className = 'test-item success';
+                document.getElementById('result-plotly').textContent = '✅ Plotly CDN 加载成功';
+            };
+            plotlyTest.onerror = () => {
+                document.getElementById('test-plotly').className = 'test-item error';
+                document.getElementById('result-plotly').textContent = '❌ Plotly CDN 加载失败';
+            };
+            document.head.appendChild(plotlyTest);
+        }
+        
+        runTests();
+    </script>
+</body>
+</html>
