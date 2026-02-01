@@ -116,6 +116,32 @@ async def get_stream_status():
     }
 
 
+@router.get("/analysis-stats")
+async def get_analysis_stats():
+    """获取实时分析统计信息"""
+    forensics = get_forensics_service()
+    
+    stats = forensics.get_analysis_stats()
+    
+    # 计算健康分数 (0-100, 越高越健康)
+    total_suspicious = sum(stats.values())
+    store = get_data_store()
+    total_trades = store.get_stats().total_trades
+    
+    if total_trades > 0:
+        suspicious_rate = total_suspicious / total_trades
+        health_score = max(0, int(100 * (1 - suspicious_rate * 10)))
+    else:
+        health_score = 100
+    
+    return {
+        'stats': stats,
+        'total_suspicious': total_suspicious,
+        'total_trades': total_trades,
+        'health_score': health_score,
+    }
+
+
 @router.post("/clear")
 async def clear_data():
     """清空所有数据（谨慎使用）"""

@@ -1,5 +1,123 @@
 # 🔒 安全性说明
 
+## 🛡️ 高级安全检测功能
+
+### 检测器总览
+
+PolySleuth 现已支持 **8 种** 高级刷量与市场操纵检测算法：
+
+| 检测器 | 类型 | 描述 | 置信度 |
+|--------|------|------|--------|
+| 🆕 新钱包内幕 | 基础 | 账龄<24h 且交易规模>5倍市场均值 | 高 |
+| 🎯 高胜率交易 | 基础 | 胜率>90% 且交易数>10 | 中 |
+| ⛽ Gas异常 | 基础 | Gas价格>区块中位数2倍 | 中 |
+| 🔄 自交易 | 高级 | maker==taker 或特征相同的关联交易 | 极高 |
+| 🔗 循环交易 | 高级 | A→B→A 或 A→B→C→A 的资金流转 | 高 |
+| ⚛️ 原子刷量 | 高级 | 同区块买卖对冲 (Split-Trade-Merge) | 极高 |
+| 📈 交易量异常 | 高级 | 5分钟交易量>1小时均值的10倍 | 中 |
+| 👥 女巫集群 | 高级 | 10秒内多钱包同向同规模投注 | 高 |
+
+### 算法详解
+
+#### 1. 自交易 (Self-Trade) 检测
+
+```python
+# 直接自交易: maker == taker
+direct_self = trades[trades['maker'] == trades['taker']]
+
+# 协调自交易: 相同 (amount, price, timestamp) 的多笔交易
+signature = f"{size}_{price}_{timestamp}"
+coordinated = trades.groupby('signature').filter(lambda x: len(x) >= 2)
+```
+
+#### 2. 循环交易 (Circular Trade) 检测
+
+使用 **NetworkX** 图算法检测资金循环：
+
+```python
+import networkx as nx
+
+G = nx.DiGraph()
+for trade in trades:
+    G.add_edge(taker, maker, weight=volume)
+
+# 检测简单循环 (2-4节点)
+cycles = nx.simple_cycles(G)
+```
+
+#### 3. 原子刷量 (Atomic Wash) 检测
+
+检测同一区块内的买卖对冲：
+
+```python
+# 同一区块、同一地址的买卖交易
+for (block, address), group in trades.groupby(['block_number', 'maker']):
+    buys = group[group['side'] == 'BUY']
+    sells = group[group['side'] == 'SELL']
+    
+    # 如果买卖量相差<20%，则为可疑
+    if abs(buy_vol - sell_vol) / max(buy_vol, sell_vol) < 0.2:
+        flag_as_atomic_wash()
+```
+
+#### 4. 交易量异常 (Volume Spike) 检测
+
+```python
+# 5分钟分箱
+trades['bin'] = trades['timestamp'].dt.floor('5min')
+
+# 1小时滚动平均
+rolling_avg = trades.groupby('bin')['volume'].sum().rolling('1H').mean()
+
+# 超过10倍均值则标记
+spikes = volume_by_bin[volume_by_bin['spike_ratio'] > 10]
+```
+
+#### 5. 女巫集群 (Sybil Cluster) 检测
+
+```python
+# 10秒时间窗口内
+# 同市场、同方向、交易规模相似(±20%)的多个钱包
+for (market, window, side), group in trades.groupby([...]):
+    if len(unique_addresses) >= 3:
+        size_deviation = (sizes - mean_size) / mean_size
+        if (size_deviation < 0.2).mean() > 0.6:
+            flag_as_sybil_cluster()
+```
+
+### 市场健康评分
+
+综合所有检测器结果，计算 0-100 的健康评分：
+
+| 评分 | 风险等级 | 描述 |
+|------|----------|------|
+| 80-100 | ✅ LOW | 市场健康 |
+| 60-79 | ⚠️ MEDIUM | 存在一些可疑活动 |
+| 40-59 | 🔶 HIGH | 存在明显的操纵迹象 |
+| 0-39 | 🚨 CRITICAL | 市场严重被操纵 |
+
+### API 端点
+
+```bash
+# 基础分析
+GET /trades/analysis/insider
+GET /trades/analysis/high-winrate
+GET /trades/analysis/gas-anomaly
+GET /trades/analysis/full
+
+# 高级分析
+GET /trades/analysis/advanced/self-trades
+GET /trades/analysis/advanced/circular-trades
+GET /trades/analysis/advanced/atomic-wash
+GET /trades/analysis/advanced/volume-spikes
+GET /trades/analysis/advanced/sybil-clusters
+
+# 综合报告
+GET /trades/analysis/advanced/market-health
+```
+
+---
+
 ## 环境变量配置
 
 ### ⚠️ 重要提示

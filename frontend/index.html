@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PolySleuth - Polymarket 刷量取证分析</title>
-    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="/static/styles.css?v=3.9">
     <!-- Google Fonts 可能被墙，使用备用字体 -->
     <script src="https://cdn.plot.ly/plotly-2.27.0.min.js" async></script>
 </head>
@@ -45,9 +45,9 @@
     <main class="main">
         <!-- 仪表盘页面 -->
         <div class="page active" id="page-dashboard">
-            <!-- 统计卡片 -->
+            <!-- 统计卡片 - 第一行：基础统计 -->
             <section class="stats-grid">
-                <div class="stat-card glass">
+                <div class="stat-card glass clickable" data-filter="all">
                     <div class="stat-icon">📊</div>
                     <div class="stat-content">
                         <div class="stat-value" id="stat-total-trades">0</div>
@@ -55,7 +55,7 @@
                     </div>
                     <div class="stat-trend up" id="stat-total-trades-trend">+0%</div>
                 </div>
-                <div class="stat-card glass">
+                <div class="stat-card glass clickable" data-filter="volume">
                     <div class="stat-icon">💰</div>
                     <div class="stat-content">
                         <div class="stat-value" id="stat-total-volume">$0</div>
@@ -63,7 +63,7 @@
                     </div>
                     <div class="stat-trend up" id="stat-total-volume-trend">+0%</div>
                 </div>
-                <div class="stat-card glass warning">
+                <div class="stat-card glass warning clickable" data-filter="wash">
                     <div class="stat-icon">🚨</div>
                     <div class="stat-content">
                         <div class="stat-value" id="stat-wash-count">0</div>
@@ -71,12 +71,104 @@
                     </div>
                     <div class="stat-trend" id="stat-wash-ratio">0%</div>
                 </div>
-                <div class="stat-card glass danger">
+                <div class="stat-card glass danger clickable" data-filter="alerts">
                     <div class="stat-icon">⚠️</div>
                     <div class="stat-content">
                         <div class="stat-value" id="stat-alerts">0</div>
                         <div class="stat-label">活跃警报</div>
                     </div>
+                </div>
+            </section>
+            
+            <!-- 统计卡片 - 第二行：实时安全检测（自动运行） -->
+            <section class="stats-grid forensics-grid">
+                <div class="stat-card glass insider clickable" data-filter="insider">
+                    <div class="stat-icon">🆕</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="stat-insider-count">0</div>
+                        <div class="stat-label">新钱包内幕</div>
+                    </div>
+                    <div class="stat-trend" id="stat-insider-trend">自动检测中</div>
+                </div>
+                <div class="stat-card glass highwin clickable" data-filter="highwin">
+                    <div class="stat-icon">🎯</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="stat-highwin-count">0</div>
+                        <div class="stat-label">高胜率交易</div>
+                    </div>
+                    <div class="stat-trend" id="stat-highwin-trend">自动检测中</div>
+                </div>
+                <div class="stat-card glass gasanomaly clickable" data-filter="gas">
+                    <div class="stat-icon">⛽</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="stat-gas-count">0</div>
+                        <div class="stat-label">Gas异常(抢跑)</div>
+                    </div>
+                    <div class="stat-trend" id="stat-gas-trend">自动检测中</div>
+                </div>
+                <div class="stat-card glass selftrade clickable" data-filter="self_trade">
+                    <div class="stat-icon">🔄</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="stat-selftrade-count">0</div>
+                        <div class="stat-label">自交易(刷量)</div>
+                    </div>
+                    <div class="stat-trend" id="stat-selftrade-trend">自动检测中</div>
+                </div>
+            </section>
+            
+            <!-- 统计卡片 - 第三行：图算法与模式匹配检测 -->
+            <section class="stats-grid advanced-grid">
+                <div class="stat-card glass circular clickable" data-filter="circular">
+                    <div class="stat-icon">🔗</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="stat-circular-count">0</div>
+                        <div class="stat-label">循环交易</div>
+                    </div>
+                    <div class="stat-trend" id="stat-circular-trend">自动检测中</div>
+                </div>
+                <div class="stat-card glass atomic clickable" data-filter="atomic">
+                    <div class="stat-icon">⚛️</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="stat-atomic-count">0</div>
+                        <div class="stat-label">原子刷量</div>
+                    </div>
+                    <div class="stat-trend" id="stat-atomic-trend">自动检测中</div>
+                </div>
+                <div class="stat-card glass sybil clickable" data-filter="sybil">
+                    <div class="stat-icon">👥</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="stat-sybil-count">0</div>
+                        <div class="stat-label">女巫集群</div>
+                    </div>
+                    <div class="stat-trend" id="stat-sybil-trend">自动检测中</div>
+                </div>
+                <div class="stat-card glass volumespike clickable" data-filter="volume_spike">
+                    <div class="stat-icon">📈</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="stat-spike-count">0</div>
+                        <div class="stat-label">交易量异常</div>
+                    </div>
+                    <div class="stat-trend" id="stat-spike-trend">自动检测中</div>
+                </div>
+            </section>
+            
+            <!-- 统计卡片 - 第四行：市场健康评估 -->
+            <section class="stats-grid health-grid">
+                <div class="stat-card glass health clickable" id="btn-health-report">
+                    <div class="stat-icon">💊</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="stat-health-score">--</div>
+                        <div class="stat-label">市场健康</div>
+                    </div>
+                    <div class="stat-trend" id="stat-health-level">实时评估</div>
+                </div>
+                <div class="stat-card glass evidence clickable" id="btn-view-evidence">
+                    <div class="stat-icon">📋</div>
+                    <div class="stat-content">
+                        <div class="stat-value" id="stat-evidence-count">0</div>
+                        <div class="stat-label">证据总数</div>
+                    </div>
+                    <div class="stat-trend" id="stat-evidence-trend">查看详情</div>
                 </div>
             </section>
             
@@ -109,14 +201,18 @@
                 </div>
             </section>
             
-            <!-- 图表区域 -->
-            <section class="charts-grid">
+            <!-- 图表区域 - 三列布局 -->
+            <section class="charts-grid-3">
                 <div class="chart-card glass">
-                    <h3>📈 交易量趋势</h3>
+                    <h3>📈 总交易量</h3>
                     <div id="chart-volume" class="chart-container"></div>
                 </div>
                 <div class="chart-card glass">
-                    <h3>🔴 刷量分布</h3>
+                    <h3>⚠️ 可疑行为趋势</h3>
+                    <div id="chart-suspicious" class="chart-container"></div>
+                </div>
+                <div class="chart-card glass">
+                    <h3>🛡️ 安全检测分布</h3>
                     <div id="chart-wash" class="chart-container"></div>
                 </div>
             </section>
@@ -155,6 +251,18 @@
                             <option value="">全部</option>
                             <option value="true">刷量交易</option>
                             <option value="false">正常交易</option>
+                            <optgroup label="基础检测">
+                                <option value="insider">🆕 新钱包内幕</option>
+                                <option value="high_winrate">🎯 高胜率交易</option>
+                                <option value="gas_anomaly">⛽ Gas异常(抢跑)</option>
+                            </optgroup>
+                            <optgroup label="高级检测">
+                                <option value="self_trade">🔄 自交易(刷量)</option>
+                                <option value="circular">🔗 循环交易</option>
+                                <option value="atomic">⚛️ 原子刷量</option>
+                                <option value="sybil">👥 女巫集群</option>
+                                <option value="volume_spike">📈 交易量异常</option>
+                            </optgroup>
                         </select>
                     </div>
                     <div class="filter-item">
@@ -277,6 +385,19 @@
         </div>
     </main>
     
+    <!-- 安全告警中心 -->
+    <div class="alert-center glass" id="alert-center">
+        <div class="alert-center-header">
+            <span class="alert-center-icon">🛡️</span>
+            <span>安全告警中心</span>
+            <span class="alert-center-badge" id="alert-center-badge">0</span>
+            <button class="alert-center-toggle" id="alert-center-toggle">−</button>
+        </div>
+        <div class="alert-center-content" id="alert-center-content">
+            <div class="alert-center-empty">暂无告警</div>
+        </div>
+    </div>
+    
     <!-- 实时交易弹窗 -->
     <div class="live-feed glass" id="live-feed">
         <div class="live-header">
@@ -288,9 +409,9 @@
         </div>
     </div>
     
-    <!-- Toast 通知 -->
+    <!-- Toast 通知（仅用于操作反馈） -->
     <div class="toast-container" id="toast-container"></div>
     
-    <script src="/static/app.js"></script>
+    <script src="/static/app.js?v=3.9"></script>
 </body>
 </html>

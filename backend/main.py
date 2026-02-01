@@ -58,14 +58,10 @@ async def lifespan(app: FastAPI):
     setup_ws_callbacks()
     logger.info("✅ WebSocket 回调已配置")
     
-    # 自动获取初始数据（后台执行，避免阻塞启动）
+    # 注意：不再自动获取初始数据，等待用户点击"开始监控"再启动
+    # 这样可以避免启动时产生大量误报
     if forensics.is_connected():
-        def _warmup_fetch():
-            logger.info("📡 正在获取初始链上数据...")
-            count = forensics.fetch_recent_trades(100)
-            logger.info(f"✅ 已获取 {count} 笔交易")
-
-        threading.Thread(target=_warmup_fetch, daemon=True).start()
+        logger.info("✅ 链上节点已就绪，等待用户启动监控...")
     
     logger.info("🎉 PolySleuth 后端启动完成!")
     logger.info(f"📍 API 地址: http://{API_HOST}:{API_PORT}")
@@ -134,9 +130,13 @@ if os.path.exists(FRONTEND_DIR):
     app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
 
 
+# SPA 路由支持 - 所有前端页面路由都返回 index.html
+SPA_ROUTES = ['/', '/dashboard', '/trades', '/markets', '/alerts']
+
+
 @app.get("/")
 async def root():
-    """根路由 - 返回前端页面或 API 信息"""
+    """根路由 - 返回前端页面"""
     index_path = os.path.join(FRONTEND_DIR, "index.html")
     if os.path.exists(index_path):
         return FileResponse(index_path)
@@ -147,6 +147,19 @@ async def root():
         "docs": "/docs",
         "websocket": "/ws",
     }
+
+
+@app.get("/dashboard")
+@app.get("/trades")
+@app.get("/markets")
+@app.get("/alerts")
+async def spa_routes():
+    """SPA 路由 - 所有前端页面都返回 index.html"""
+    index_path = os.path.join(FRONTEND_DIR, "index.html")
+    if os.path.exists(index_path):
+        return FileResponse(index_path)
+    
+    return {"error": "Frontend not found"}
 
 
 @app.get("/api")

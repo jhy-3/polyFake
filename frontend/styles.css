@@ -303,6 +303,114 @@ body {
     color: var(--danger);
 }
 
+/* 可点击卡片效果 */
+.stat-card.clickable {
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.stat-card.clickable:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(0, 245, 212, 0.2);
+}
+
+.stat-card.clickable:active,
+.stat-card.clickable.floating {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 0 20px 60px rgba(0, 245, 212, 0.3);
+    z-index: 10;
+}
+
+.stat-card.clickable.selected {
+    border: 2px solid var(--primary);
+    box-shadow: 0 0 30px rgba(0, 245, 212, 0.4);
+}
+
+/* 新的分析类型卡片颜色 */
+.stat-card.insider::before {
+    background: linear-gradient(180deg, #9b59b6, #8e44ad);
+}
+
+.stat-card.highwin::before {
+    background: linear-gradient(180deg, #e74c3c, #c0392b);
+}
+
+.stat-card.gasanomaly::before {
+    background: linear-gradient(180deg, #f39c12, #d68910);
+}
+
+.stat-card.analysis::before {
+    background: linear-gradient(180deg, var(--primary), var(--primary-dark));
+}
+
+.stat-card.analysis {
+    background: linear-gradient(135deg, rgba(0, 245, 212, 0.1), rgba(0, 191, 165, 0.05));
+}
+
+.stat-card.analysis:hover {
+    background: linear-gradient(135deg, rgba(0, 245, 212, 0.2), rgba(0, 191, 165, 0.1));
+}
+
+/* 高级检测卡片样式 */
+.stat-card.selftrade::before {
+    background: linear-gradient(180deg, #3498db, #2980b9);
+}
+
+.stat-card.circular::before {
+    background: linear-gradient(180deg, #1abc9c, #16a085);
+}
+
+.stat-card.atomic::before {
+    background: linear-gradient(180deg, #e91e63, #c2185b);
+}
+
+.stat-card.sybil::before {
+    background: linear-gradient(180deg, #673ab7, #512da8);
+}
+
+.stat-card.volumespike::before {
+    background: linear-gradient(180deg, #ff5722, #e64a19);
+}
+
+.stat-card.health::before {
+    background: linear-gradient(180deg, #4caf50, #388e3c);
+}
+
+.stat-card.evidence::before {
+    background: linear-gradient(180deg, #607d8b, #455a64);
+}
+
+.stat-card.fullscan::before {
+    background: linear-gradient(180deg, #00bcd4, #0097a7);
+}
+
+.stat-card.fullscan {
+    background: linear-gradient(135deg, rgba(0, 188, 212, 0.1), rgba(0, 151, 167, 0.05));
+}
+
+.stat-card.fullscan:hover {
+    background: linear-gradient(135deg, rgba(0, 188, 212, 0.2), rgba(0, 151, 167, 0.1));
+}
+
+/* 健康评分颜色 */
+.stat-card.health.risk-low .stat-value { color: #4caf50; }
+.stat-card.health.risk-medium .stat-value { color: #ff9800; }
+.stat-card.health.risk-high .stat-value { color: #ff5722; }
+.stat-card.health.risk-critical .stat-value { color: #f44336; }
+
+/* 取证分析网格 */
+.forensics-grid {
+    margin-top: -0.5rem;
+}
+
+.advanced-grid {
+    margin-top: -0.5rem;
+}
+
+.health-grid {
+    margin-top: -0.5rem;
+}
+
 /* =========================================
    Control Panel
    ========================================= */
@@ -413,12 +521,19 @@ body {
     margin-bottom: 2rem;
 }
 
+.charts-grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
 .chart-card {
-    padding: 1.5rem;
+    padding: 1rem;
 }
 
 .chart-container {
-    height: 300px;
+    height: 280px;
 }
 
 /* =========================================
@@ -683,6 +798,53 @@ tr:hover td {
     color: var(--primary);
 }
 
+/* 新的分析类型标签 - 基础检测 */
+.tag-insider {
+    background: rgba(155, 89, 182, 0.3);
+    color: #bb8fce;
+}
+
+.tag-highwin {
+    background: rgba(231, 76, 60, 0.3);
+    color: #f1948a;
+}
+
+.tag-gas {
+    background: rgba(243, 156, 18, 0.3);
+    color: #f9e79f;
+}
+
+.tag-suspicious {
+    background: rgba(255, 193, 7, 0.3);
+    color: #ffc107;
+}
+
+/* 高级检测类型标签 */
+.tag-selftrade {
+    background: rgba(52, 152, 219, 0.3);
+    color: #5dade2;
+}
+
+.tag-circular {
+    background: rgba(26, 188, 156, 0.3);
+    color: #48c9b0;
+}
+
+.tag-atomic {
+    background: rgba(233, 30, 99, 0.3);
+    color: #f48fb1;
+}
+
+.tag-sybil {
+    background: rgba(103, 58, 183, 0.3);
+    color: #b39ddb;
+}
+
+.tag-spike {
+    background: rgba(255, 87, 34, 0.3);
+    color: #ff8a65;
+}
+
 .tx-hash {
     font-family: var(--font-mono);
     font-size: 0.8rem;
@@ -920,26 +1082,183 @@ tr:hover td {
 }
 
 /* =========================================
+   Security Alert Center
+   ========================================= */
+
+.alert-center {
+    position: fixed;
+    top: 80px;
+    right: 2rem;
+    width: 360px;
+    max-height: 450px;
+    z-index: 150;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.alert-center.collapsed {
+    max-height: 48px;
+}
+
+.alert-center-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background: linear-gradient(135deg, rgba(247, 37, 133, 0.15), rgba(255, 107, 53, 0.1));
+    border-bottom: 1px solid var(--border-color);
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.alert-center-icon {
+    font-size: 16px;
+}
+
+.alert-center-badge {
+    background: var(--danger);
+    color: white;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-left: auto;
+    margin-right: 8px;
+    min-width: 20px;
+    text-align: center;
+}
+
+.alert-center-badge.zero {
+    background: var(--success);
+}
+
+.alert-center-toggle {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 1;
+    padding: 0 4px;
+}
+
+.alert-center-toggle:hover {
+    color: var(--text);
+}
+
+.alert-center-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
+    max-height: 380px;
+}
+
+.alert-center-empty {
+    text-align: center;
+    color: var(--text-muted);
+    padding: 24px;
+    font-size: 13px;
+}
+
+.alert-card {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    font-size: 12px;
+    animation: alertSlideIn 0.3s ease;
+}
+
+.alert-card:last-child {
+    margin-bottom: 0;
+}
+
+.alert-card.high {
+    border-left: 3px solid var(--danger);
+}
+
+.alert-card.medium {
+    border-left: 3px solid var(--warning);
+}
+
+.alert-card.low {
+    border-left: 3px solid var(--info);
+}
+
+.alert-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+}
+
+.alert-card-type {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.alert-card-time {
+    color: var(--text-muted);
+    font-size: 11px;
+}
+
+.alert-card-detail {
+    color: var(--text-secondary);
+    font-size: 11px;
+    line-height: 1.4;
+}
+
+.alert-card-detail a {
+    color: var(--primary);
+    text-decoration: none;
+}
+
+.alert-card-detail a:hover {
+    text-decoration: underline;
+}
+
+@keyframes alertSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* =========================================
    Toast Notifications
    ========================================= */
 
 .toast-container {
     position: fixed;
-    top: 80px;
-    right: 2rem;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
     z-index: 200;
     display: flex;
     flex-direction: column;
+    align-items: center;
     gap: 0.5rem;
 }
 
 .toast {
-    padding: 1rem 1.5rem;
+    padding: 0.75rem 1.5rem;
     border-radius: 8px;
     background: var(--bg-card);
     border: 1px solid var(--border-color);
     animation: toastIn 0.3s ease;
-    max-width: 350px;
+    max-width: 400px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
 .toast.success {
@@ -998,6 +1317,237 @@ tr:hover td {
 }
 
 /* =========================================
+   Evidence Modal (证据弹窗)
+   ========================================= */
+
+.evidence-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    backdrop-filter: blur(5px);
+}
+
+.evidence-modal-content {
+    width: 90%;
+    max-width: 800px;
+    max-height: 85vh;
+    overflow-y: auto;
+    padding: 2rem;
+    border: 1px solid var(--border-glow);
+    animation: modalSlideIn 0.3s ease;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.evidence-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.evidence-modal-header h2 {
+    color: var(--primary);
+    margin: 0;
+}
+
+.evidence-modal-header .btn-close {
+    background: transparent;
+    border: 1px solid var(--danger);
+    color: var(--danger);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+}
+
+.evidence-modal-header .btn-close:hover {
+    background: var(--danger);
+    color: white;
+}
+
+.evidence-summary {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.summary-item {
+    text-align: center;
+    padding: 1rem;
+    background: var(--bg-hover);
+    border-radius: 8px;
+}
+
+.summary-item .label {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.summary-item .value {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--primary);
+}
+
+.evidence-modal-body h3 {
+    color: var(--text-primary);
+    margin: 1.5rem 0 1rem;
+    font-size: 1.1rem;
+}
+
+.evidence-types {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.type-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: var(--bg-card);
+    border-radius: 20px;
+    font-size: 0.9rem;
+}
+
+.type-name {
+    color: var(--text-primary);
+}
+
+.type-count {
+    background: var(--primary);
+    color: var(--bg-dark);
+    padding: 0.2rem 0.5rem;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 0.8rem;
+}
+
+.evidence-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.evidence-item {
+    padding: 1rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.evidence-item:hover {
+    border-color: var(--primary);
+    transform: translateX(5px);
+}
+
+.evidence-type {
+    font-weight: bold;
+    color: var(--primary);
+    margin-bottom: 0.5rem;
+}
+
+.evidence-confidence {
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.evidence-details {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.evidence-details a {
+    color: var(--accent);
+    text-decoration: none;
+}
+
+.evidence-details a:hover {
+    text-decoration: underline;
+}
+
+.evidence-addresses {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 0.5rem;
+}
+
+.evidence-addresses code {
+    background: var(--bg-hover);
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    font-family: monospace;
+}
+
+.suspicious-addresses {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.address-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    background: var(--bg-card);
+    border-radius: 8px;
+}
+
+.address-item .address {
+    color: var(--accent);
+    text-decoration: none;
+    font-family: monospace;
+    font-size: 0.85rem;
+}
+
+.address-item .address:hover {
+    text-decoration: underline;
+}
+
+.address-item .risk-score {
+    font-weight: bold;
+}
+
+.address-item .evidence-count {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    margin-left: auto;
+}
+
+/* =========================================
    Responsive
    ========================================= */
 
@@ -1008,6 +1558,14 @@ tr:hover td {
     
     .charts-grid {
         grid-template-columns: 1fr;
+    }
+    
+    .charts-grid-3 {
+        grid-template-columns: 1fr;
+    }
+    
+    .evidence-summary {
+        grid-template-columns: repeat(2, 1fr);
     }
 }
 
@@ -1033,5 +1591,14 @@ tr:hover td {
     
     .live-feed {
         display: none;
+    }
+    
+    .evidence-summary {
+        grid-template-columns: 1fr;
+    }
+    
+    .evidence-modal-content {
+        width: 95%;
+        padding: 1rem;
     }
 }
