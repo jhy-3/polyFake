@@ -18,7 +18,7 @@ DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{DATA_DIR}/polysleuth.db")
 # Polygon RPC
 POLYGON_RPC_URL = os.getenv(
     "POLYGON_RPC_URL",
-    "https://polygon-mainnet.core.chainstack.com/426e31068913765410aa4a1e4e5686e6"
+    "https://polygon-rpc.com"  # 使用公共 RPC 作为默认值
 )
 
 # Polymarket 合约地址

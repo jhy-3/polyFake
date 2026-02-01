@@ -21,16 +21,21 @@ from web3.exceptions import TransactionNotFound
 # 常量配置
 # ============================================================================
 
-# Polymarket 合约地址
-CTF_EXCHANGE_ADDRESS = "0x4bFb41d5B3570DeFd03C39a9A4D8dE6Bd8B8982E"
-NEG_RISK_EXCHANGE_ADDRESS = "0xC5d563A36AE78145C45a50134d48A1215220f80a"
-CONDITIONAL_TOKENS_ADDRESS = "0x4D97DCd97eC945f40cF65F87097ACe5EA0476045"
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+# Polymarket 合约地址（从环境变量读取，提供默认值）
+CTF_EXCHANGE_ADDRESS = os.getenv("CTF_EXCHANGE_ADDRESS", "0x4bFb41d5B3570DeFd03C39a9A4D8dE6Bd8B8982E")
+NEG_RISK_EXCHANGE_ADDRESS = os.getenv("NEG_RISK_EXCHANGE_ADDRESS", "0xC5d563A36AE78145C45a50134d48A1215220f80a")
+CONDITIONAL_TOKENS_ADDRESS = os.getenv("CONDITIONAL_TOKENS_ADDRESS", "0x4D97DCd97eC945f40cF65F87097ACe5EA0476045")
 USDC_ADDRESS = "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174"
 
 # API URLs
-GAMMA_API_BASE = "https://gamma-api.polymarket.com"
+GAMMA_API_BASE = os.getenv("GAMMA_API_URL", "https://gamma-api.polymarket.com")
 CLOB_API_BASE = "https://clob.polymarket.com"
-DEFAULT_RPC_URL = "https://polygon-rpc.com"
+DEFAULT_RPC_URL = os.getenv("POLYGON_RPC_URL", "https://polygon-rpc.com")
 
 # 事件签名
 ORDER_FILLED_SIGNATURE = "OrderFilled(bytes32,address,address,uint256,uint256,uint256,uint256,uint256)"
