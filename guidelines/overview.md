@@ -1,4 +1,12 @@
-这是一个为您量身定制的黑客松项目方案文档。它结合了您提供的《Polymarket 架构与链上数据解码》文档中的底层机制，以及您在 DeFi 和 AI 领域的专业背景。
+# PolySleuth —— 链上预测市场取证与反操纵雷达
+
+> **文档状态**: 本文档为项目早期构思阶段的愿景规划（v0.1），部分功能已在当前版本实现。  
+> **当前版本**: v2.0 - FastAPI 后端 + 原生 JS 前端架构  
+> **实施情况**: ✅ 已实现 | 🚧 部分实现 | ⏸️ 计划中
+
+---
+
+这是一个为 Polymarket 量身定制的链上数据取证分析项目文档。它基于《Polymarket 架构与链上数据解码》底层机制，结合 DeFi 和 AI 领域的专业技术。
 
 ---
 
@@ -14,51 +22,57 @@
 
 ## 2. 痛点分析 (Problem Statement)
 
+**✅ 已验证并实现**
+
 目前 Polymarket 生态存在以下数据盲区：
 
-1. **虚假繁荣**：某些市场的 Volume 可能由少数地址反复倒手（Self-Trading）刷出，误导散户入场。
-2. **隐形操纵**：巨鲸可能通过分拆钱包（Sybil Attacks）在“负风险（Negative Risk）”市场中进行复杂的套利或操纵，普通前端无法察觉。
-3. **数据黑盒**：官方 API 提供聚合数据，但缺乏基于原子级链上交易（Atomic On-chain Transactions）的取证工具。
+1. **虚假繁荣**：某些市场的 Volume 可能由少数地址反复倒手（Self-Trading）刷出，误导散户入场。✅ 已实现自交易检测
+2. **隐形操纵**：巨鲸可能通过分拆钱包（Sybil Attacks）在"负风险（Negative Risk）"市场中进行复杂的套利或操纵，普通前端无法察觉。✅ 已实现女巫集群检测
+3. **数据黑盒**：官方 API 提供聚合数据，但缺乏基于原子级链上交易（Atomic On-chain Transactions）的取证工具。✅ 已实现链上数据解码
 
 ---
 
 ## 3. 技术架构 (Technical Architecture)
 
+**实施状态**: 🚧 核心架构已实现，采用 FastAPI + 混合存储架构
+
 ### 3.1 数据层：链上证据链构建器 (The Evidence Chain)
 
-基于您提供的文档，我们需要构建一个专用的 Indexer。
+**✅ 已实现** - 基于 `backend/services/forensics.py` 和 `storage.py`
 
-* **数据源**：Polygon RPC
+* **数据源**：Polygon RPC（支持 Chainstack、Alchemy、Infura）
 * **监听合约**：
-* `CTF Exchange` (二元市场撮合)
-* `NegRisk_CTFExchange` (多选市场撮合)
-* `ConditionalTokens` (底层资产铸造与销毁)
-
+  * ✅ `CTF Exchange` (二元市场撮合)
+  * ⏸️ `NegRisk_CTFExchange` (多选市场撮合) - 计划中
+  * ✅ `ConditionalTokens` (底层资产铸造与销毁)
 
 * **核心解析逻辑（Trade Decoder & Market Decoder）**：
-* **交易事件**：解析 `OrderFilled`，提取 `maker` / `taker` / `price`。
-* **资金流转**：**关键点**——必须同步监听 `PositionSplit`（资金注入/铸造）和 `PositionsMerge`（资金赎回/销毁）。
-* **复杂转换**：监听 `PositionsConverted`（负风险市场中 No 转 Yes 的操作），这是识别高级操纵的关键。
+  * ✅ **交易事件**：解析 `OrderFilled`，提取 `maker` / `taker` / `price`。
+  * ✅ **资金流转**：监听 `PositionSplit`（资金注入/铸造）和 `PositionsMerge`（资金赎回/销毁）。
+  * ⏸️ **复杂转换**：监听 `PositionsConverted`（负风险市场中 No 转 Yes 的操作）- 计划中
 
+### 3.2 分析层：图算法与启发式检测 (The Brain)
 
-
-### 3.2 分析层：图神经网络与启发式算法 (The Brain)
+**✅ 已实现** - 基于 `backend/services/analyzer.py` 和 `advanced_forensics.py`
 
 * **图数据库（Graph Construction）**：
-* 节点（Nodes）：钱包地址（EOA）、合约地址。
-* 边（Edges）：资产转移（Transfer）、交易对手关系（Traded_With）、资金同源关系（Funded_By）。
-
+  * ✅ 节点（Nodes）：钱包地址（EOA）
+  * ✅ 边（Edges）：交易对手关系（Traded_With）、资金流转
+  * 🚧 使用 NetworkX 进行图分析
 
 * **检测算法**：
-* **闭环检测 (Cycle Detection)**：资金路径  的识别。
-* **同源聚类 (Sybil Clustering)**：通过分析 Gas 费来源，将看似独立的 Maker 和 Taker 关联到同一个交易所提币地址或分发钱包。
-
-
+  * ✅ **闭环检测 (Cycle Detection)**：识别循环交易模式
+  * ✅ **同源聚类 (Sybil Clustering)**：女巫集群检测
+  * ✅ **原子刷量检测**：Split-Trade-Merge 模式识别
 
 ### 3.3 展示层：取证看板 (The Dashboard)
 
-* **市场健康度评分**：0-100分，分数越低代表刷量越严重。
-* **可视化证据**：展示可疑交易的哈希列表及资金流向图。
+**✅ 已实现** - 前后端分离架构
+
+* ✅ **市场健康度评分**：0-100分，综合8种检测算法
+* ✅ **实时推送**：WebSocket 实时数据流
+* ✅ **可视化展示**：交易列表、市场分析、警报管理
+* ✅ **REST API**：完整的 API 文档（/docs）
 
 ---
 

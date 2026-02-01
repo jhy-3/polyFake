@@ -41,13 +41,17 @@ PolySleuth v2.0 采用了完全前后端分离的架构设计，相比 v1.0 的 
   - `websocket.py`: WebSocket 实时推送
 - **services/**: 业务逻辑层
   - `storage.py`: 数据存储服务（混合架构）
-  - `forensics.py`: 取证分析引擎
+  - `forensics.py`: 基础取证分析引擎
+  - `analyzer.py`: 高级取证分析器（新钱包、胜率、Gas异常）
+  - `advanced_forensics.py`: 高级刷量检测（自交易、循环、原子、女巫）
 
 #### 2. 前端 (原生 JS)
 
 **位置**: `frontend/`
 
-- **index.html**: 单页应用
+- **index.html**: 主仪表板页面
+- **simple.html**: 简化版页面
+- **test.html**: 测试页面
 - **styles.css**: Cyberpunk 主题样式
 - **app.js**: 应用逻辑
   - 状态管理
@@ -56,7 +60,18 @@ PolySleuth v2.0 采用了完全前后端分离的架构设计，相比 v1.0 的 
   - 图表渲染
   - 页面导航
 
-#### 3. 数据存储
+#### 3. Streamlit 旧版本（遗留）
+
+**位置**: `polysleuth/`
+
+- **dashboard_pro.py**: 专业版 Streamlit 仪表板
+- **dashboard_real.py**: 基础版 Streamlit 仪表板
+- **data_fetcher.py**: Polymarket API 数据获取
+- **real_forensics.py**: 链上取证引擎
+
+> ⚠️ 注意：Streamlit 版本（v1.0）已被 FastAPI + WebSocket 架构（v2.0）取代，但保留用于参考和对比。
+
+#### 4. 数据存储
 
 **混合架构设计**:
 
